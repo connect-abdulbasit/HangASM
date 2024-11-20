@@ -30,12 +30,74 @@ msg17 BYTE " Keep track of the letters you've guessed to avoid repeating guesses
 msg18 BYTE " Good luck, and have fun !",0
 endingPrompt BYTE "Press any key to continue..."
 select_option DWORD ?
+Dash byte "_",0
+SelectedWord byte 10 DUP(?)
+GuessWord byte 10 DUP(?)
+lengthOfWord DWORD ?
+Score DWORD ?
+Attempts DWORD ?
 
 
 GuessWord1 BYTE "ORANGE",0, "FAMILY",0, "SILVER",0, "DONATE",0, "MONDAY",0, "NATURE",0, "BROKEN",0, "RACHEL",0, "FRIDAY",0, "FATHER", 0
 GuessWord2 BYTE "JASMINE",0, "OSTRICH",0, "CHAPTER",0, "CRYSTAL",0, "DEPOSIT",0, "HOLIDAY",0, "CALIBER",0, "KITCHEN", 0,"KINGDOM",0, "ACQUIRE", 0
 GuessWord3 BYTE "DINOSAUR",0,"PROVIDES",0,"DYNAMICS",0,"PRODUCES",0,"ALPHABET",0,"UNDERWAY",0,"UNIFORMS",0,"UNIQUELY",0,"THURSDAY",0,"ANTIHERO",0
 GuessWord4 BYTE "DANGEROUS",0, "MASCULINE",0, "SOMETHING",0, "KNOWLEDGE",0, "WRESTLING",0, "WONDERFUL", 0, "EDUCATION",0, "CELEBRATE",0, "ALONGSIDE",0, "COMPANIES", 0
+
+HangmanStages db "   +---+  ", 0Dh, 0Ah
+              db "   |   |  ", 0Dh, 0Ah
+              db "       |  ", 0Dh, 0Ah
+              db "       |  ", 0Dh, 0Ah
+              db "       |  ", 0Dh, 0Ah
+              db "       |  ", 0Dh, 0Ah
+              db "  ========", 0Dh, 0Ah, 0
+
+Stage1 db "   +---+  ", 0Dh, 0Ah
+        db "   |   |  ", 0Dh, 0Ah
+        db "   O   |  ", 0Dh, 0Ah
+        db "       |  ", 0Dh, 0Ah
+        db "       |  ", 0Dh, 0Ah
+        db "       |  ", 0Dh, 0Ah
+        db "  ========", 0Dh, 0Ah, 0
+
+Stage2 db "   +---+  ", 0Dh, 0Ah
+        db "   |   |  ", 0Dh, 0Ah
+        db "   O   |  ", 0Dh, 0Ah
+        db "   |   |  ", 0Dh, 0Ah
+        db "       |  ", 0Dh, 0Ah
+        db "       |  ", 0Dh, 0Ah
+        db "  ========", 0Dh, 0Ah, 0
+
+Stage3 db "   +---+  ", 0Dh, 0Ah
+        db "   |   |  ", 0Dh, 0Ah
+        db "   O   |  ", 0Dh, 0Ah
+        db "  /|   |  ", 0Dh, 0Ah
+        db "       |  ", 0Dh, 0Ah
+        db "       |  ", 0Dh, 0Ah
+        db "  ========", 0Dh, 0Ah, 0
+
+Stage4 db "   +---+  ", 0Dh, 0Ah
+        db "   |   |  ", 0Dh, 0Ah
+        db "   O   |  ", 0Dh, 0Ah
+        db "  /|\  |  ", 0Dh, 0Ah
+        db "       |  ", 0Dh, 0Ah
+        db "       |  ", 0Dh, 0Ah
+        db "  ========", 0Dh, 0Ah, 0
+
+Stage5 db "   +---+  ", 0Dh, 0Ah
+        db "   |   |  ", 0Dh, 0Ah
+        db "   O   |  ", 0Dh, 0Ah
+        db "  /|\  |  ", 0Dh, 0Ah
+        db "  /    |  ", 0Dh, 0Ah
+        db "       |  ", 0Dh, 0Ah
+        db "  ========", 0Dh, 0Ah, 0
+
+Stage6 db "   +---+  ", 0Dh, 0Ah
+        db "   |   |  ", 0Dh, 0Ah
+        db "   O   |  ", 0Dh, 0Ah
+        db "  /|\  |  ", 0Dh, 0Ah
+        db "  / \  |  ", 0Dh, 0Ah
+        db "       |  ", 0Dh, 0Ah
+        db "  ========", 0Dh, 0Ah, 0
 
 .code
 main proc 
@@ -184,7 +246,195 @@ function_howtoplay endp
 
 function_play proc
 
+call SelectWord
+call WordFormation
+
+mov edx,offset selectedWord
+call writestring
+call crlf
+mov edx,offset GuessWord
+call writestring
+call crlf
+
+mov score,0
+mov Attempts,6
+
+play_loop:
+call display_hangman
+call readchar
+call writechar
+call checkWord
+dec Attempts
+mov ecx,Attempts
+cmp ecx,0
+jg play_loop
+
+
+
 ret
 function_play endp
 
+display_hangman proc
+mov eax,Attempts
+cmp eax, 0
+    je stage_0
+    cmp eax, 1
+    je stage_1
+    cmp eax, 2
+    je stage_2
+    cmp eax, 3
+    je stage_3
+    cmp eax, 4
+    je stage_4
+    cmp eax, 5
+    je stage_5
+    cmp eax, 6
+    je stage_6
+    jmp end_display
+
+stage_0:
+    mov edx, offset HangmanStages
+    jmp display
+
+stage_1:
+    mov edx, offset Stage1
+    jmp display
+
+stage_2:
+    mov edx, offset Stage2
+    jmp display
+
+stage_3:
+    mov edx, offset Stage3
+    jmp display
+
+stage_4:
+    mov edx, offset Stage4
+    jmp display
+
+stage_5:
+    mov edx, offset Stage5
+    jmp display
+
+stage_6:
+    mov edx, offset Stage6
+    jmp display
+
+display:
+    call writestring
+    call crlf
+    ret
+    end_display:
+
+ret
+display_hangman endp
+
+SelectWord proc
+call randomize
+mov eax,4
+call randomrange
+cmp eax,0
+je six
+cmp eax,1
+je seven
+cmp eax,2
+je eight
+jmp nine
+
+six:
+
+mov lengthOfWord,6
+call randomize
+mov eax,10
+call randomrange
+mov ebx,7
+mul ebx
+mov edx,offset GuessWord1
+add edx,eax
+mov ecx,7
+jmp printWord
+
+seven:
+mov lengthOfWord,7
+call randomize
+mov eax,10
+call randomrange
+mov ebx,8
+mul ebx
+mov edx,offset GuessWord2
+add edx,eax
+mov ecx,8
+jmp printWord
+
+
+eight:
+mov lengthOfWord,8
+call randomize
+mov eax,10
+call randomrange
+mov ebx,9
+mul ebx
+mov edx,offset GuessWord3
+add edx,eax
+mov ecx,9
+jmp printWord
+
+
+nine:
+mov lengthOfWord,9
+call randomize
+mov eax,10
+call randomrange
+mov ebx,10
+mul ebx
+mov edx,offset GuessWord4
+add edx,eax
+mov ecx,10
+jmp printWord
+
+
+printWord:
+
+
+mov esi,0
+l1:
+mov al,[edx+esi]
+mov SelectedWord[esi],al
+cmp ecx,1
+je exitLoop
+mov GuessWord[esi],"_"
+inc esi
+loop l1
+
+exitLoop:
+
+mov GuessWord[esi],al
+mov edx,offset SelectedWord
+ret
+SelectWord endp
+
+
+WordFormation proc
+
+mov ecx,lengthOfWord
+mov ebx,ecx
+shr ecx,1
+
+reveal_loop:
+call randomize
+mov eax,ebx
+call randomrange
+mov dl, GuessWord[eax]     
+cmp dl, '_'                
+jne reveal_loop 
+mov dl,SelectedWord[eax]
+mov GuessWord[eax],dl
+loop reveal_loop
+
+ret
+Wordformation endp
+checkWord proc
+
+ret
+checkWord endp
 end main
