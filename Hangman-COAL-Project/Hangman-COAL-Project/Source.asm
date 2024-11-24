@@ -261,11 +261,7 @@ mov score,0
 mov Attempts,6
 
 play_loop:
-<<<<<<< HEAD
-
-=======
 call clrscr
->>>>>>> b70df2c0954706062ba744989cb1e5d6c0e15a12
 call display_hangman
 call readchar
 call writechar
@@ -275,14 +271,8 @@ mov ecx,Attempts
 cmp ecx,0
 jg play_loop
 
-<<<<<<< HEAD
-=======
 call display_hangman
->>>>>>> b70df2c0954706062ba744989cb1e5d6c0e15a12
-
-ret
 function_play endp
-
 display_hangman proc
 mov eax,Attempts
 cmp eax, 0
