@@ -36,6 +36,7 @@ GuessWord byte 10 DUP(?)
 lengthOfWord DWORD ?
 Score DWORD ?
 Attempts DWORD ?
+checkcorrectattempt DWORD 0
 
 
 GuessWord1 BYTE "ORANGE",0, "FAMILY",0, "SILVER",0, "DONATE",0, "MONDAY",0, "NATURE",0, "BROKEN",0, "RACHEL",0, "FRIDAY",0, "FATHER", 0
@@ -260,15 +261,15 @@ mov score,0
 mov Attempts,6
 
 play_loop:
+
 call display_hangman
 call readchar
 call writechar
+call crlf
 call checkWord
-dec Attempts
 mov ecx,Attempts
 cmp ecx,0
 jg play_loop
-
 
 
 ret
@@ -433,8 +434,52 @@ loop reveal_loop
 
 ret
 Wordformation endp
+
 checkWord proc
+
+
+mov ecx , lengthof SelectedWord
+
+mov esi , offset SelectedWord
+mov edi , offset GuessWord
+
+CheckLoop:
+
+cmp al , [esi]
+
+je UpdateWord
+jne ContinueChecking
+
+UpdateWord:
+
+mov checkcorrectattempt , 1
+
+mov [edi] , al
+
+
+ContinueChecking:
+
+inc esi
+inc edi
+
+loop CheckLoop
+
+cmp checkcorrectattempt , 0
+
+jne EndProcedure
+
+dec Attempts
+
+EndProcedure:
+
+mov checkcorrectattempt , 0
+
+mov edx , offset GuessWord
+call writestring
+call crlf
 
 ret
 checkWord endp
+
+
 end main
