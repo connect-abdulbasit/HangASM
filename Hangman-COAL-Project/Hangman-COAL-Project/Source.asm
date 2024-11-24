@@ -9,6 +9,7 @@ choice3 BYTE "3. Exit ",0
 msg1 BYTE "You exit the game successfully Thank you ",0
 msg2 BYTE "Do you want to play again ?",0
 
+
 choice4 BYTE "1.Yes",0
 choice5 BYTE "2.No",0
 
@@ -37,7 +38,8 @@ lengthOfWord DWORD ?
 Score DWORD ?
 Attempts DWORD ?
 checkcorrectattempt DWORD 0
-
+scoremessage1 BYTE "You Scored ",0
+scoremessage2 BYTE "/10",0
 
 GuessWord1 BYTE "ORANGE",0, "FAMILY",0, "SILVER",0, "DONATE",0, "MONDAY",0, "NATURE",0, "BROKEN",0, "RACHEL",0, "FRIDAY",0, "FATHER", 0
 GuessWord2 BYTE "JASMINE",0, "OSTRICH",0, "CHAPTER",0, "CRYSTAL",0, "DEPOSIT",0, "HOLIDAY",0, "CALIBER",0, "KITCHEN", 0,"KINGDOM",0, "ACQUIRE", 0
@@ -278,6 +280,17 @@ cmp ecx,0
 jg play_loop
 exitplayloop:
 
+call ScoreCalculate
+
+call crlf
+mov edx,offset scoremessage1
+call writestring
+call writedec
+mov edx,offset scoremessage2
+call writestring
+call crlf
+
+
 ret
 function_play endp
 
@@ -487,5 +500,29 @@ call crlf
 ret
 checkWord endp
 
+ScoreCalculate Proc 
+
+cmp Attempts , 0
+
+je zeromarks
+
+mov edx,6
+mov Score,10
+
+sub  edx , Attempts
+
+sub Score,edx
+
+mov eax , Score
+jmp endScoring
+
+zeromarks:
+
+mov Score,0
+mov eax,Score
+
+endScoring:
+ret
+ScoreCalculate endp
 
 end main
