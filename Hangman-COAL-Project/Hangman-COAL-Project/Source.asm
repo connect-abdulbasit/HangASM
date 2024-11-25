@@ -482,10 +482,15 @@ jne ContinueChecking
 
 UpdateWord:
 
-mov checkcorrectattempt , 1
+mov bl,[edi]
+
+cmp bl , al
+
+je AlreadyGuess
 
 mov [edi] , al
 
+mov checkcorrectattempt , 1
 
 ContinueChecking:
 
@@ -494,6 +499,7 @@ inc edi
 
 loop CheckLoop
 
+AlreadyGuess:
 cmp checkcorrectattempt , 0
 
 jne EndProcedure
