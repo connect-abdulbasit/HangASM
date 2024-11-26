@@ -13,7 +13,7 @@ msg2 BYTE "Do you want to play again ?",0
 choice4 BYTE "1.Yes",0
 choice5 BYTE "2.No",0
 
-msg3 BYTE "------------WLECOME TO THE HANGMAN GAME --------------------",0
+msg3 BYTE "------------WELCOME TO THE HANGMAN GAME --------------------",0
 msg4 BYTE " Here's how to play",0
 msg5 BYTE " A word will be displayed with some letters missing.",0
 msg6 BYTE " Your goal is to guess the missing letters of the word.",0
@@ -29,7 +29,10 @@ msg15 BYTE " After the game ends, your final score will be calculated based on t
 msg16 BYTE " -------------------------- Tips ------------------------:",0
 msg17 BYTE " Keep track of the letters you've guessed to avoid repeating guesses.",0
 msg18 BYTE " Good luck, and have fun !",0
-endingPrompt BYTE "Press any key to continue..."
+endingPrompt BYTE "Press any key to continue...",0
+wrongGuessPrompt BYTE "Nope, that letter isn't in the word. Keep trying!",0
+rightGuessPrompt BYTE "Nice! That letter is in the word. Keep it up!",0
+correctWord Byte "The correct word is: ",0
 select_option DWORD ?
 Dash byte "_",0
 SelectedWord byte 10 DUP(?)
@@ -106,6 +109,7 @@ Stage6 db "   +---+  ", 0Dh, 0Ah
 main proc 
 
 mainMenu:
+call clrscr
 mov edx , offset choice
 call writestring
 call crlf
@@ -170,7 +174,7 @@ exit
 main endp
 
 function_howtoplay proc
-
+call clrscr
 call crlf
 mov edx , offset msg3
 call writestring
@@ -248,23 +252,21 @@ ret
 function_howtoplay endp
 
 function_play proc
-
 call SelectWord
 call WordFormation
 
-mov edx,offset selectedWord
-call writestring
-call crlf
-mov edx,offset GuessWord
-call writestring
 call crlf
 
 mov score,0
 mov Attempts,6
 
 play_loop:
+call clrscr
 
 call display_hangman
+mov edx , offset GuessWord
+call writestring
+call crlf
 call readchar
 call writechar
 call crlf
@@ -279,7 +281,10 @@ mov ecx,Attempts
 cmp ecx,0
 jg play_loop
 exitplayloop:
-
+call clrscr
+call display_hangman
+mov edx , offset GuessWord
+call writestring
 call ScoreCalculate
 
 call crlf
@@ -289,6 +294,12 @@ call writedec
 mov edx,offset scoremessage2
 call writestring
 call crlf
+
+mov edx,offset endingPrompt
+call writestring
+call readdec
+
+call clrscr
 
 
 ret
@@ -486,16 +497,21 @@ loop CheckLoop
 cmp checkcorrectattempt , 0
 
 jne EndProcedure
-
-dec Attempts
-
-EndProcedure:
-
-mov checkcorrectattempt , 0
-
-mov edx , offset GuessWord
+mov edx,offset wrongGuessPrompt
 call writestring
 call crlf
+dec Attempts
+jmp printResult
+
+EndProcedure:
+mov edx,offset rightGuessPrompt
+call writestring
+call crlf
+printResult:
+mov edx,offset endingPrompt 
+call writestring
+call readdec  
+mov checkcorrectattempt , 0
 
 ret
 checkWord endp
@@ -520,6 +536,11 @@ zeromarks:
 
 mov Score,0
 mov eax,Score
+call crlf
+mov edx,offset correctWord
+call writestring
+mov edx,offset selectedWord
+call writestring
 
 endScoring:
 ret
