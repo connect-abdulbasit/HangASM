@@ -134,7 +134,7 @@ je endprogram
 
 play:
 call function_play
-
+call clrscr
 mov edx , offset msg2
 call writestring
 call crlf
@@ -156,8 +156,8 @@ jmp skip
 
 how_to_play:
 call function_howtoplay
-
 skip:
+call clrscr
 jmp mainMenu
 
 endprogram:
@@ -167,7 +167,7 @@ exit
 main endp
 
 function_howtoplay proc
-
+call clrscr
 call crlf
 mov edx , offset msg3
 call writestring
@@ -245,7 +245,7 @@ ret
 function_howtoplay endp
 
 function_play proc
-
+call clrscr
 call SelectWord
 call WordFormation
 
@@ -260,6 +260,7 @@ mov score,0
 mov Attempts,6
 
 play_loop:
+call clrscr
 call display_hangman
 call readchar
 call writechar
@@ -269,7 +270,7 @@ mov ecx,Attempts
 cmp ecx,0
 jg play_loop
 
-
+call display_hangman
 
 ret
 function_play endp
